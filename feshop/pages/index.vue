@@ -5,13 +5,28 @@
  * 2. 可以按照價格區間篩選
  * 3. 可以按照顏色進行篩選，並且右側可能顯示個別的數量
  * 4. 商品可以按照排序顯示
- * 5. 「總共 21 個結果中的 1–16」必須顯示回傳的正確數值
+ * 5. 「總共 21 個結果中的 1–16」必須顯示回傳的正確數值，一頁十個
  * 6. 購物車內容可以重複加入，數量為累加
  * 7. 購物車中的「圖片」「名稱」「數量」「售價」需顯示正確，價格為所有商品個別 售價 * 數量 加總！
  * 8. header 搜尋匡按下 enter 下方商品清單顯示查詢後的條件(可以和 篩選條件、排序共同存在)
  * 9. 購物車可以刪除商品
  */
-export default {};
+import { apiGetHomeCategories } from "@/api/home";
+
+export default {
+  // data() {
+  //   return {
+  //     categories: []
+  //   };
+  // },
+  mounted() {
+    console.log("dsifafd:");
+    // apiGetHomeCategories().then(data => (this.categories = data));
+  },
+  methods: {
+    chooseCategories(id) {}
+  }
+};
 </script>
 
 <template>
@@ -102,42 +117,17 @@ export default {};
                   <div class="sidebar-title"><h3>分類</h3></div>
                   <div class="sidebar-body">
                     <ul class="sidebar-category">
-                      <li>
-                        <a href="#">水果</a>
+                      <!-- <li v-for="category in categories" :key="category.id">
+                        <a @click="chooseCategories(category.id)">{{
+                          category.title
+                        }}</a>
                         <ul class="children">
                           <li><a href="#">Samsome</a></li>
                           <li><a href="#">GL Stylus</a></li>
                           <li><a href="#">Uawei</a></li>
                           <li><a href="#">Cherry Berry</a></li>
                         </ul>
-                      </li>
-                      <li>
-                        <a href="#">果汁</a>
-                        <ul class="children">
-                          <li><a href="#">Power Bank</a></li>
-                          <li><a href="#">Data Cable</a></li>
-                          <li><a href="#">Power Cable</a></li>
-                          <li><a href="#">Battery</a></li>
-                        </ul>
-                      </li>
-                      <li>
-                        <a href="#">肉類</a>
-                        <ul class="children">
-                          <li><a href="#">Desktop Headphone</a></li>
-                          <li><a href="#">Mobile Headphone</a></li>
-                          <li><a href="#">Wireless Headphone</a></li>
-                          <li><a href="#">LED Headphone</a></li>
-                        </ul>
-                      </li>
-                      <li>
-                        <a href="#">蔬菜</a>
-                        <ul class="children">
-                          <li><a href="#">Desktop Headphone</a></li>
-                          <li><a href="#">Mobile Headphone</a></li>
-                          <li><a href="#">Wireless Headphone</a></li>
-                          <li><a href="#">LED Headphone</a></li>
-                        </ul>
-                      </li>
+                      </li> -->
                     </ul>
                   </div>
                 </div>
