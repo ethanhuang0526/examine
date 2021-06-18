@@ -1,17 +1,27 @@
 import axios from "@/plugins/axios";
 
 export const apiGetHomeCategories = () => {
-  return axios.get("/categories");
+  return axios.get("/api/categories");
 };
 
 // 六角化商品資料
-export const apiGetF2ecampItems = () => {
-  return axios.get(`/v2/activities/f2ecamp/items`);
+export const apiGetHomeColors = () => {
+  return axios.get(`/api/colors`);
 };
 
 // 取得使用者點擊紀錄
-export const apiGetF2ecampClicks = payload => {
-  return axios.get(`/v2/activities/f2ecamp/clicks`);
+export const apiGetItems = params => {
+  return axios.get(`/api/items`, {
+    params: {
+      category: params.category || undefined,
+      range: params.range || undefined,
+      color: params.color || undefined,
+      search: params.search || undefined,
+      order: params.order || undefined,
+      sort: params.sort || "ASC",
+      page: params.page || 1
+    }
+  });
 };
 
 // 紀錄點擊紀錄
