@@ -1,19 +1,3 @@
-<script>
-/**
- * 測驗規範
- * 1. 可以按照分類篩選
- * 2. 可以按照價格區間篩選
- * 3. 可以按照顏色進行篩選，並且右側可能顯示個別的數量
- * 4. 商品可以按照排序顯示
- * 5. 「總共 21 個結果中的 1–16」必須顯示回傳的正確數值
- * 6. 購物車內容可以重複加入，數量為累加
- * 7. 購物車中的「圖片」「名稱」「數量」「售價」需顯示正確，價格為所有商品個別 售價 * 數量 加總！
- * 8. header 搜尋匡按下 enter 下方商品清單顯示查詢後的條件(可以和 篩選條件、排序共同存在)
- * 9. 購物車可以刪除商品
- */
-export default {};
-</script>
-
 <template>
   <div>
     <header class="header-area">
@@ -32,50 +16,43 @@ export default {};
               <div class="header-settings-area">
                 <div class="header-top-right">
                   <div class="header-search-box">
-                    <form>
-                      <input type="text" placeholder="Search Here" /><button>
-                        <i class="ion-ios-search-strong"></i>
-                      </button>
-                    </form>
+                    <input
+                      v-model="choose.search"
+                      type="text"
+                      placeholder="Search Here"
+                      @keypress.enter="getProduct()"
+                    /><button>
+                      <i class="ion-ios-search-strong"></i>
+                    </button>
                   </div>
                   <div class="mini-cart-wrap">
                     <button>
-                      <i class="ion-bag"></i><span class="notification">2</span>
+                      <i class="ion-bag"></i
+                      ><span class="notification">{{ cartTotal }}</span>
                     </button>
                     <ul class="cart-list">
-                      <li>
+                      <li v-for="cart in carts" :key="cart.id">
                         <div class="cart-img">
                           <a href="product-details.html"
-                            ><img src="assets/img/cart/cart-1.jpg" alt=""
+                            ><img :src="cart.image" alt=""
                           /></a>
                         </div>
                         <div class="cart-info">
                           <h4>
-                            <a href="product-details.html">商品名稱</a>
+                            <a href="product-details.html">{{ cart.title }}</a>
                           </h4>
-                          <span class="cart-qty">數量: 1</span
-                          ><span>$60.00</span>
+                          <span class="cart-qty">數量: {{ cart.amount }}</span
+                          ><span>${{ cart.sale_price || 0 }}</span>
                         </div>
-                        <div class="del-icon"><i class="fa fa-times"></i></div>
-                      </li>
-                      <li>
-                        <div class="cart-img">
-                          <a href="product-details.html"
-                            ><img src="assets/img/cart/cart-2.jpg" alt=""
-                          /></a>
+                        <div class="del-icon" @click="deleteItem(cart)">
+                          <i class="fa fa-times"></i>
                         </div>
-                        <div class="cart-info">
-                          <h4>
-                            <a href="product-details.html">商品名稱</a>
-                          </h4>
-                          <span class="cart-qty">數量: 2</span
-                          ><span>$100.00</span>
-                        </div>
-                        <div class="del-icon"><i class="fa fa-times"></i></div>
                       </li>
                       <li class="mini-cart-price">
                         <span class="subtotal">小計 :</span
-                        ><span class="subtotal-price ml-auto">$110.00</span>
+                        ><span class="subtotal-price ml-auto"
+                          >${{ getTotal() }}</span
+                        >
                       </li>
                       <li class="checkout-btn"><a href="#">檢視購物車</a></li>
                       <li class="checkout-btn"><a href="#">結帳</a></li>
@@ -102,40 +79,19 @@ export default {};
                   <div class="sidebar-title"><h3>分類</h3></div>
                   <div class="sidebar-body">
                     <ul class="sidebar-category">
-                      <li>
-                        <a href="#">水果</a>
+                      <li v-for="category in categories" :key="category.id">
+                        <a @click="chooseCategories(category.id)">{{
+                          category.title
+                        }}</a>
                         <ul class="children">
-                          <li><a href="#">Samsome</a></li>
-                          <li><a href="#">GL Stylus</a></li>
-                          <li><a href="#">Uawei</a></li>
-                          <li><a href="#">Cherry Berry</a></li>
-                        </ul>
-                      </li>
-                      <li>
-                        <a href="#">果汁</a>
-                        <ul class="children">
-                          <li><a href="#">Power Bank</a></li>
-                          <li><a href="#">Data Cable</a></li>
-                          <li><a href="#">Power Cable</a></li>
-                          <li><a href="#">Battery</a></li>
-                        </ul>
-                      </li>
-                      <li>
-                        <a href="#">肉類</a>
-                        <ul class="children">
-                          <li><a href="#">Desktop Headphone</a></li>
-                          <li><a href="#">Mobile Headphone</a></li>
-                          <li><a href="#">Wireless Headphone</a></li>
-                          <li><a href="#">LED Headphone</a></li>
-                        </ul>
-                      </li>
-                      <li>
-                        <a href="#">蔬菜</a>
-                        <ul class="children">
-                          <li><a href="#">Desktop Headphone</a></li>
-                          <li><a href="#">Mobile Headphone</a></li>
-                          <li><a href="#">Wireless Headphone</a></li>
-                          <li><a href="#">LED Headphone</a></li>
+                          <li
+                            v-for="child in category.children"
+                            :key="child.id"
+                          >
+                            <a @click="chooseCategories(child.id)">{{
+                              child.title
+                            }}</a>
+                          </li>
                         </ul>
                       </li>
                     </ul>
@@ -171,11 +127,14 @@ export default {};
                   <div class="sidebar-title"><h3>顏色</h3></div>
                   <div class="sidebar-body">
                     <ul class="color-list">
-                      <li><a href="#">gold</a><span>(5)</span></li>
-                      <li><a href="#">green</a><span>(6)</span></li>
-                      <li><a href="#">blue</a><span>(2)</span></li>
-                      <li><a href="#">white</a><span>(1)</span></li>
-                      <li><a href="#">red</a><span>(4)</span></li>
+                      <li
+                        v-for="color in colors"
+                        :key="color.color"
+                        @click="chooseColor(color.color)"
+                      >
+                        <a>{{ color.color }}</a
+                        ><span>({{ color.amount }})</span>
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -194,18 +153,29 @@ export default {};
                       <div class="top-bar-right">
                         <div class="product-short">
                           <p>排序 :</p>
-                          <select class="nice-select" name="sortby">
-                            <option value="sales">名稱 (A - Z)</option>
-                            <option value="sales">名稱 (Z - A)</option>
-                            <option value="rating">售價 (低 &gt; 高)</option>
-                            <option value="rating">售價 (高 &gt; 低)</option>
-                            <option value="date">評價 (高 &gt; 低)</option>
-                            <option value="date">評價 (低 &gt; 高)</option>
+                          <select
+                            v-model="order"
+                            class="nice-select"
+                            name="sortby"
+                          >
+                            <option value="1">名稱 (A - Z)</option>
+                            <option value="2">名稱 (Z - A)</option>
+                            <option value="3">售價 (低 &gt; 高)</option>
+                            <option value="4">售價 (高 &gt; 低)</option>
+                            <option value="5">評價 (高 &gt; 低)</option>
+                            <option value="6">評價 (低 &gt; 高)</option>
                           </select>
                         </div>
                         <div class="product-amount">
                           <!-- 需要按照回傳的資料顯示正確的數字 -->
-                          <p>總共 21 個結果中的 1–16</p>
+                          <p>
+                            總共 {{ items.total }} 個結果中的
+                            {{
+                              items.total == 0
+                                ? 0
+                                : (items.current_page - 1) * items.per_page + 1
+                            }}–{{ currentEnd }}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -214,17 +184,15 @@ export default {};
                 <!-- shop product top wrap start --><!-- product item list start -->
                 <div class="shop-product-wrap list-view row">
                   <div
-                    v-for="item in 4"
-                    :key="item"
+                    v-for="item in items.data"
+                    :key="item.id"
                     class="col-lg-4 col-md-4 col-sm-6"
                   >
                     <!-- product grid item end --><!-- product list item start -->
                     <div class="product-list-item mb-30">
                       <div class="product-thumb">
                         <!-- 商品圖片 -->
-                        <a href="product-details.html"
-                          ><img src="assets/img/product/product-1.jpg" alt=""
-                        /></a>
+                        <a><img :src="item.image" alt=""/></a>
                         <div class="quick-view-link">
                           <a
                             href="#"
@@ -238,31 +206,31 @@ export default {};
                       <div class="product-content-list">
                         <div class="ratings">
                           <!-- 實際評分顯示 -->
-                          <span><i class="ion-android-star"></i></span>
-                          <span><i class="ion-android-star"></i></span>
-                          <span><i class="ion-android-star"></i></span>
-                          <span><i class="ion-android-star"></i></span>
-                          <span><i class="ion-android-star"></i></span>
+                          <span v-for="i in item.score" :key="i"
+                            ><i class="ion-android-star"></i
+                          ></span>
                         </div>
                         <div class="product-name">
-                          <h4><a href="product-details.html">商品名稱</a></h4>
+                          <h4>
+                            <a href="product-details.html">{{ item.title }}</a>
+                          </h4>
                         </div>
                         <div class="price-box">
                           <!-- 目前售價 (優惠價格)，沒有優惠價格就顯示原價！請注意樣式 -->
-                          <span class="regular-price">$100.00</span>
+                          <span class="regular-price"
+                            >${{ item.sale_price || 0 }}</span
+                          >
                           <!-- 定價 (原價) -->
-                          <span class="old-price"><del>$130.00</del></span>
+                          <span class="old-price"
+                            ><del>${{ item.price || 0 }}</del></span
+                          >
                         </div>
                         <p>
-                          <!-- 商品敘述 -->
-                          Lorem ipsum dolor sit amet, consectetur adipiscing
-                          elit. Fusce posuere metus vitae arcu imperdiet, id
-                          aliquet ante scelerisque. Sed sit amet sem vitae urna
-                          fringilla tempus.
+                          fajeokpfkesmpvifrkl;geifveial';fk,le;/'imnjselglepro
                         </p>
                         <div class="action-link">
                           <a
-                            href="#"
+                            @click="addToCart(item)"
                             data-toggle="tooltip"
                             title="Add to cart"
                             class="add-to-cart"
@@ -275,20 +243,28 @@ export default {};
                   </div>
                 </div>
                 <!-- product item list end --><!-- start pagination area -->
-                <div class="paginatoin-area text-center mt-30">
+                <div
+                  v-if="items.last_page > 1"
+                  class="paginatoin-area text-center mt-30"
+                >
                   <ul class="pagination-box">
                     <!-- 目前頁數第一頁要消失 -->
                     <li>
-                      <a class="Previous" href="#">
+                      <a class="Previous" @click="previous()">
                         <i class="ion-ios-arrow-left"></i>
                       </a>
                     </li>
-                    <li class="active"><a href="#">1</a></li>
-                    <li><a href="#">2</a></li>
-                    <li><a href="#">3</a></li>
+                    <li
+                      v-for="i in items.last_page"
+                      :key="i"
+                      :class="[{ active: choose.page === i }]"
+                      @click="toPage(i)"
+                    >
+                      <a>{{ i }}</a>
+                    </li>
                     <!-- 最後一頁要消失 -->
                     <li>
-                      <a class="Next" href="#">
+                      <a class="Next" @click="next()">
                         <i class="ion-ios-arrow-right"></i>
                       </a>
                     </li>
@@ -450,6 +426,24 @@ export default {};
 </template>
 
 <script>
+/**
+ * 測驗規範
+ * 1. 可以按照分類篩選
+ * 2. 可以按照價格區間篩選 X 抓不到該資料
+ * 3. 可以按照顏色進行篩選，並且右側可能顯示個別的數量
+ * 4. 商品可以按照排序顯示
+ * 5. 「總共 21 個結果中的 1–16」必須顯示回傳的正確數值，一頁十個
+ * 6. 購物車內容可以重複加入，數量為累加
+ * 7. 購物車中的「圖片」「名稱」「數量」「售價」需顯示正確，價格為所有商品個別 售價 * 數量 加總！
+ * 8. header 搜尋匡按下 enter 下方商品清單顯示查詢後的條件(可以和 篩選條件、排序共同存在)
+ * 9. 購物車可以刪除商品
+ */
+import {
+  apiGetHomeCategories,
+  apiGetHomeColors,
+  apiGetItems
+} from "@/api/home";
+
 export default {
   head() {
     return {
@@ -465,6 +459,150 @@ export default {
         { src: "/assets/js/active.js", body: true }
       ]
     };
+  },
+  data() {
+    return {
+      items: { data: [], meta: {} },
+
+      order: 1,
+      colors: [],
+      categories: [],
+      choose: {
+        search: "",
+        category: "",
+        range: "",
+        color: "",
+        search: "",
+        order: "title",
+        sort: "ASC",
+        page: 1
+      },
+      carts: []
+    };
+  },
+  created() {
+    apiGetItems(this.choose).then(({ data }) => {
+      this.items = data;
+    });
+    apiGetHomeColors().then(({ data }) => (this.colors = data));
+    apiGetHomeCategories().then(({ data }) => {
+      this.categories = data;
+    });
+  },
+  computed: {
+    currentEnd() {
+      return this.items.total == 0
+        ? 0
+        : (this.items.current_page - 1) * this.items.per_page +
+            this.items.data.length;
+    },
+    cartTotal() {
+      let amount = 0;
+      this.carts.forEach(item => (amount += item.amount));
+
+      return amount;
+    }
+  },
+  watch: {
+    order() {
+      switch (this.order) {
+        case "1":
+          this.choose.order = "title";
+          this.choose.sort = "ASC";
+          break;
+        case "2":
+          this.choose.order = "title";
+          this.choose.sort = "DESC";
+          break;
+        case "3":
+          this.choose.order = "sale_price";
+          this.choose.sort = "ASC";
+          break;
+        case "4":
+          this.choose.order = "sale_price";
+          this.choose.sort = "DESC";
+          break;
+        case "5":
+          this.choose.order = "score";
+          this.choose.sort = "DESC";
+          break;
+        case "6":
+          this.choose.order = "score";
+          this.choose.sort = "ASC";
+          break;
+      }
+
+      this.getProduct();
+    }
+  },
+  methods: {
+    chooseCategories(id) {
+      let category = {};
+      const params = [];
+      if ((category = this.categories.find(item => item.id === id))) {
+        category.children.forEach(child => params.push(child.id));
+        this.choose.category = params.join(",");
+      } else {
+        this.choose.category = id;
+      }
+
+      this.choose.page = 1;
+      this.getProduct();
+    },
+    chooseColor(color) {
+      this.choose.color = color;
+
+      this.choose.page = 1;
+      this.getProduct();
+    },
+    getProduct() {
+      apiGetItems(this.choose).then(({ data }) => {
+        this.items = data;
+      });
+    },
+    addToCart(item) {
+      const cart = this.carts.find(cart => cart.id === item.id);
+
+      if (cart) {
+        cart.amount++;
+      } else {
+        this.carts.push({ ...item, amount: 1 });
+      }
+    },
+    previous() {
+      if (this.choose.page > 1) {
+        this.choose.page--;
+
+        this.getProduct();
+      }
+    },
+    toPage(page) {
+      this.choose.page = page;
+
+      this.getProduct();
+    },
+    next() {
+      if (this.choose.page < this.items.last_page) {
+        this.choose.page++;
+
+        this.getProduct();
+      }
+    },
+    getTotal() {
+      let total = 0;
+      this.carts.forEach(item => {
+        total += item.sale_price * item.amount;
+      });
+
+      return total;
+    },
+    deleteItem(cart) {
+      const itemIndex = this.carts.findIndex(item => cart.id === item.id);
+
+      if (itemIndex >= 0) {
+        this.carts.splice(itemIndex, 1);
+      }
+    }
   }
 };
 </script>
